@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The AI Frontier Audit</title>
+<style>
+  :root {
+    --ink: #14171c;
+    --ink-soft: #3a4049;
+    --paper: #eceae3;
+    --paper-raised: #f5f3ec;
+    --line: #c9c5b8;
+    --line-soft: #d8d4c8;
+    --safe: #4a7c6f;       /* delegate - calm teal-green */
+    --safe-fill: rgba(74, 124, 111, 0.12);
+    --scrutiny: #c08a3e;   /* scrutinize - amber */
+    --scrutiny-fill: rgba(192, 138, 62, 0.12);
+    --guard: #a8503c;      /* guard - terracotta-red */
+    --guard-fill: rgba(168, 80, 60, 0.12);
+    --grid: rgba(20, 23, 28, 0.08);
+    --shadow: rgba(20, 23, 28, 0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    line-height: 1.55;
+    padding: 32px 20px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  .eyebrow {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  h1 {
+    font-size: clamp(30px, 6vw, 44px);
+    line-height: 1.04;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 18px;
+  }
+  h1 em { font-style: italic; }
+
+  .standfirst {
+    font-size: clamp(16px, 2.4vw, 18px);
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin-bottom: 14px;
+  }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  .byline {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 38px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  /* ---- intro panel ---- */
+  .intro {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-soft);
+    padding: 24px 26px;
+    margin-bottom: 36px;
+  }
+  .intro h2 {
+    font-size: 17px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .intro p { font-size: 15px; color: var(--ink-soft); margin-bottom: 10px; }
+  .intro p:last-child { margin-bottom: 0; }
+  .axis-key {
+    display: grid;
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .axis-row {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+  }
+  .axis-tag {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 3px 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .axis-row p { margin: 0; font-size: 14px; }
+
+  /* ---- task entry ---- */
+  .entry {
+    border: 1px solid var(--line-soft);
+    background: var(--paper-raised);
+    margin-bottom: 16px;
+  }
+  .entry-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .entry-num {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    flex-shrink: 0;
+  }
+  .entry-head input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    padding: 4px 0;
+  }
+  .entry-head input:focus { outline: none; }
+  .entry-head input::placeholder { color: #9a968a; font-style: italic; }
+  .remove {
+    background: none;
+    border: none;
+    color: #9a968a;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    padding: 2px 6px;
+    flex-shrink: 0;
+    font-family: serif;
+  }
+  .remove:hover { color: var(--guard); }
+
+  .sliders { padding: 16px 18px 20px; display: grid; gap: 20px; }
+  .slider-block label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 9px;
+    gap: 12px;
+  }
+  .slider-block label .q { color: var(--ink); font-weight: 600; }
+  .slider-block label .val {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    text-align: right;
+    flex-shrink: 0;
+    max-width: 48%;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--line);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--paper-raised);
+    border: 2px solid var(--ink);
+    cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--paper-raised);
+    border: 2px solid var(--ink);
+    cursor: pointer;
+  }
+  input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(20,23,28,0.2); }
+
+  .scale-ends {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9a968a;
+    margin-top: 7px;
+  }
+
+  .add-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px dashed var(--line);
+    color: var(--ink-soft);
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 30px;
+  }
+  .add-btn:hover { border-color: var(--ink); color: var(--ink); background: var(--paper-raised); }
+
+  .run-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--ink);
+    border: none;
+    color: var(--paper);
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .run-btn:hover { background: #000; }
+  .run-btn:disabled { background: var(--line); cursor: not-allowed; }
+
+  /* ---- results ---- */
+  .results { margin-top: 48px; display: none; }
+  .results.show { display: block; animation: fade 0.5s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .results-eyebrow {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .results-eyebrow::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--ink);
+  }
+
+  /* the plot */
+  .plot-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 560px;
+    margin: 0 auto 14px;
+    border-left: 1.5px solid var(--ink);
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .plot-canvas { position: absolute; inset: 0; }
+
+  .axis-label-x, .axis-label-y {
+    position: absolute;
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .axis-label-x { bottom: -34px; left: 50%; transform: translateX(-50%); text-align: center; width: 100%;}
+  .axis-label-y {
+    top: 50%; left: -10px;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: left center;
+    white-space: nowrap;
+  }
+  .corner-note {
+    position: absolute;
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9a968a;
+    pointer-events: none;
+  }
+
+  .dot {
+    position: absolute;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    transform: translate(-50%, 50%);
+    border: 1.5px solid var(--paper);
+    box-shadow: 0 1px 4px var(--shadow);
+    cursor: default;
+  }
+  .dot-label {
+    position: absolute;
+    font-size: 11px;
+    color: var(--ink);
+    transform: translate(-50%, 50%);
+    white-space: nowrap;
+    pointer-events: none;
+    background: rgba(236, 234, 227, 0.82);
+    padding: 1px 4px;
+  }
+
+  /* verdict cards */
+  .verdicts { display: grid; gap: 14px; margin-top: 56px; }
+  .verdict {
+    border: 1px solid var(--line-soft);
+    border-left-width: 3px;
+    padding: 16px 20px;
+    background: var(--paper-raised);
+  }
+  .verdict.b-safe { border-left-color: var(--safe); }
+  .verdict.b-scrutiny { border-left-color: var(--scrutiny); }
+  .verdict.b-guard { border-left-color: var(--guard); }
+  .verdict-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .verdict-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .b-safe .verdict-dot { background: var(--safe); }
+  .b-scrutiny .verdict-dot { background: var(--scrutiny); }
+  .b-guard .verdict-dot { background: var(--guard); }
+  .verdict-name { font-weight: 600; font-size: 16px; }
+  .verdict-count {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-left: auto;
+  }
+  .verdict-desc { font-size: 14px; color: var(--ink-soft); margin-bottom: 10px; }
+  .verdict-tasks { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+  .verdict-tasks li {
+    font-size: 13px;
+    border: 1px solid var(--line);
+    padding: 3px 9px;
+    background: var(--paper);
+  }
+  .verdict-empty { font-size: 13px; color: #9a968a; font-style: italic; }
+
+  .takeaway {
+    margin-top: 32px;
+    padding: 24px 26px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .takeaway h3 {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+  .takeaway p { font-size: 16px; margin-bottom: 12px; }
+  .takeaway p:last-child { margin-bottom: 0; }
+  .takeaway em { font-style: italic; }
+
+  .restart {
+    margin-top: 24px;
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    cursor: pointer;
+  }
+  .restart:hover { border-color: var(--ink); color: var(--ink); }
+
+  .colophon {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line-soft);
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .colophon strong { color: var(--ink); font-weight: 600; }
+
+  @media (max-width: 480px) {
+    body { padding: 24px 16px 60px; }
+    .dot-label { font-size: 10px; }
+    .sliders { padding: 14px 14px 18px; }
+    .entry-head { padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">The AI Frontier Audit</div>
+  <h1>Find the edge where AI stops helping you and starts <em>quietly hurting you.</em></h1>
+  <p class="standfirst">AI is flattening the easy parts of every job. The skill that now separates people is knowing which of your tasks to hand over, which to <strong>watch closely</strong>, and which to keep in your own hands. This audit maps your actual work onto that edge.</p>
+  <p class="byline">A free tool from the "Surviving Corporate America in the Age of AI" series · Takes about 5 minutes</p>
+
+  <div class="intro">
+    <h2>How it works</h2>
+    <p>List the recurring tasks in your role, the things you actually do in a normal week. For each one, set two dials. The combination places the task on the frontier and tells you how to treat it.</p>
+    <div class="axis-key">
+      <div class="axis-row">
+        <span class="axis-tag">Dial 1 · Fit</span>
+        <p>How well-defined and pattern-based is this task? Work with clear inputs and a known shape of answer sits high. Work that depends on messy context, taste, or relationships sits low.</p>
+      </div>
+      <div class="axis-row">
+        <span class="axis-tag">Dial 2 · Cost</span>
+        <p>If the output were subtly wrong and you did not catch it, how expensive would that be? A throwaway internal note is low. A board number, a client commitment, a legal line is high.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="entries"></div>
+
+  <button class="add-btn" id="addBtn">+ Add another task</button>
+  <button class="run-btn" id="runBtn">Map my frontier</button>
+
+  <!-- results -->
+  <div class="results" id="results">
+    <div class="results-eyebrow">Your frontier</div>
+    <div class="plot-frame">
+      <div class="plot-canvas" id="plotCanvas"></div>
+      <span class="corner-note" style="top:6px; left:8px;">Delegate</span>
+      <span class="corner-note" style="top:6px; right:8px; text-align:right;">Scrutinize</span>
+      <span class="corner-note" style="bottom:6px; left:8px;">Low stakes,<br>low fit</span>
+      <span class="corner-note" style="bottom:6px; right:8px; text-align:right;">Guard</span>
+      <span class="axis-label-x">Fit &nbsp;→&nbsp; how well AI can do it</span>
+      <span class="axis-label-y">Cost &nbsp;→&nbsp; price of a missed error</span>
+    </div>
+
+    <div class="verdicts" id="verdicts"></div>
+
+    <div class="takeaway" id="takeaway"></div>
+
+    <button class="restart" id="restartBtn">Run it again</button>
+  </div>
+
+  <div class="colophon">
+    <p><strong>Why two dials instead of one.</strong> Most AI advice sorts tasks by whether the tool <em>can</em> do them. That misses the real risk. The 2023 Harvard and BCG study on AI and knowledge work found that people using AI on tasks outside its reach did meaningfully worse than people who used no AI at all, because the output looked right and quietly wasn't. Fit alone is a trap. Fit measured against the cost of being wrong is judgment. That second dial is the whole point.</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var SEED = [
+    { name: "Drafting a first version of a recurring report", fit: 78, cost: 30 },
+    { name: "Summarizing a source you'll quote in a real decision", fit: 64, cost: 72 },
+    { name: "A judgment call that depends on context only you hold", fit: 22, cost: 68 }
+  ];
+
+  var entriesEl = document.getElementById('entries');
+  var count = 0;
+
+  function makeEntry(label, fitVal, costVal) {
+    count++;
+    var idx = count;
+    var fitDefault = (typeof fitVal === 'number') ? fitVal : 50;
+    var costDefault = (typeof costVal === 'number') ? costVal : 50;
+    var wrap = document.createElement('div');
+    wrap.className = 'entry';
+    wrap.innerHTML =
+      '<div class="entry-head">' +
+        '<span class="entry-num">' + String(idx).padStart(2, '0') + '</span>' +
+        '<input type="text" placeholder="Name a task you do regularly\u2026" value="' + (label ? label.replace(/"/g, '&quot;') : '') + '">' +
+        '<button class="remove" title="Remove" aria-label="Remove task">\u00d7</button>' +
+      '</div>' +
+      '<div class="sliders">' +
+        '<div class="slider-block">' +
+          '<label><span class="q">Fit</span> <span class="val" data-fit-label></span></label>' +
+          '<input type="range" min="0" max="100" value="' + fitDefault + '" data-fit>' +
+          '<div class="scale-ends"><span>Needs my judgment</span><span>Clean &amp; pattern-based</span></div>' +
+        '</div>' +
+        '<div class="slider-block">' +
+          '<label><span class="q">Cost of a missed error</span> <span class="val" data-cost-label></span></label>' +
+          '<input type="range" min="0" max="100" value="' + costDefault + '" data-cost>' +
+          '<div class="scale-ends"><span>Trivial</span><span>Severe</span></div>' +
+        '</div>' +
+      '</div>';
+
+    entriesEl.appendChild(wrap);
+
+    var fit = wrap.querySelector('[data-fit]');
+    var cost = wrap.querySelector('[data-cost]');
+    var fitLabel = wrap.querySelector('[data-fit-label]');
+    var costLabel = wrap.querySelector('[data-cost-label]');
+
+    function fitText(v) {
+      if (v < 25) return "Low \u2014 leans on context or taste";
+      if (v < 45) return "Below the middle \u2014 needs steering";
+      if (v <= 55) return "Mixed \u2014 parts routine, parts need me";
+      if (v < 80) return "Good \u2014 mostly a known shape";
+      return "High \u2014 clean, repeatable, defined";
+    }
+    function costText(v) {
+      if (v < 25) return "Trivial \u2014 a throwaway";
+      if (v < 45) return "Low \u2014 easy to catch and fix";
+      if (v <= 55) return "Moderate \u2014 annoying but recoverable";
+      if (v < 80) return "High \u2014 real consequences if missed";
+      return "Severe \u2014 costly, public, or hard to undo";
+    }
+    fit.addEventListener('input', function () { fitLabel.textContent = fitText(+fit.value); });
+    cost.addEventListener('input', function () { costLabel.textContent = costText(+cost.value); });
+    fitLabel.textContent = fitText(+fit.value);
+    costLabel.textContent = costText(+cost.value);
+
+    wrap.querySelector('.remove').addEventListener('click', function () {
+      wrap.remove();
+      renumber();
+    });
+  }
+
+  function renumber() {
+    var nums = entriesEl.querySelectorAll('.entry-num');
+    nums.forEach(function (n, i) { n.textContent = String(i + 1).padStart(2, '0'); });
+  }
+
+  SEED.forEach(function (s) { makeEntry(s.name, s.fit, s.cost); });
+
+  document.getElementById('addBtn').addEventListener('click', function () { makeEntry('', 50, 50); });
+
+  // ---- scoring ----
+  function classify(fit, cost) {
+    // fit and cost are 0-100
+    // Guard: low fit (AI can't really do it well)
+    // Scrutinize: decent fit but high cost (useful and dangerous)
+    // Delegate: decent fit, low/moderate cost
+    if (fit < 45) return 'guard';
+    if (cost >= 60) return 'scrutiny';
+    return 'safe';
+  }
+
+  var BUCKET = {
+    safe:    { name: 'Delegate',  cls: 'b-safe',
+      desc: 'Good fit, low cost of error. This is becoming free for you and everyone else. Hand it over, spend the time you save on the work below.' },
+    scrutiny:{ name: 'Scrutinize', cls: 'b-scrutiny',
+      desc: 'AI can help here, but the output looks right exactly when it is wrong, and a miss is expensive. This is where your judgment earns its keep. Use the tool, then check it like it is trying to fool you.' },
+    guard:   { name: 'Guard', cls: 'b-guard',
+      desc: 'This leans on context, taste, or relationships the model does not have. Handing it over produces confident, plausible, wrong. Keep it in your own hands for now.' }
+  };
+
+  function gather() {
+    var rows = [];
+    entriesEl.querySelectorAll('.entry').forEach(function (e) {
+      var name = e.querySelector('input[type=text]').value.trim();
+      if (!name) return;
+      var fit = +e.querySelector('[data-fit]').value;
+      var cost = +e.querySelector('[data-cost]').value;
+      rows.push({ name: name, fit: fit, cost: cost, bucket: classify(fit, cost) });
+    });
+    return rows;
+  }
+
+  var COLORS = {
+    safe: getComputedStyle(document.documentElement).getPropertyValue('--safe').trim(),
+    scrutiny: getComputedStyle(document.documentElement).getPropertyValue('--scrutiny').trim(),
+    guard: getComputedStyle(document.documentElement).getPropertyValue('--guard').trim()
+  };
+
+  function plot(rows) {
+    var canvas = document.getElementById('plotCanvas');
+    canvas.innerHTML = '';
+    // shaded zones via SVG underlay
+    var svg = '<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;">';
+    // guard zone: fit < 45 (left strip)
+    svg += '<rect x="0" y="0" width="45" height="100" fill="rgba(168,80,60,0.10)"/>';
+    // scrutinize zone: fit >=45, cost >=60 (top right)
+    svg += '<rect x="45" y="0" width="55" height="40" fill="rgba(192,138,62,0.10)"/>';
+    // delegate zone: fit >=45, cost <60 (bottom right)
+    svg += '<rect x="45" y="40" width="55" height="60" fill="rgba(74,124,111,0.10)"/>';
+    // gridlines
+    var i;
+    for (i = 1; i < 4; i++) {
+      svg += '<line x1="' + (i*25) + '" y1="0" x2="' + (i*25) + '" y2="100" stroke="rgba(20,23,28,0.07)" stroke-width="0.4"/>';
+      svg += '<line x1="0" y1="' + (i*25) + '" x2="100" y2="' + (i*25) + '" stroke="rgba(20,23,28,0.07)" stroke-width="0.4"/>';
+    }
+    // frontier line: the boundary of the safe-to-delegate region
+    svg += '<path d="M 45 100 L 45 40 L 100 40" fill="none" stroke="rgba(20,23,28,0.32)" stroke-width="0.6" stroke-dasharray="2 1.6"/>';
+    svg += '</svg>';
+    canvas.innerHTML = svg;
+
+    // detect overlaps and fan them out slightly
+    var seen = {};
+    rows.forEach(function (r) {
+      var key = Math.round(r.fit / 4) + ':' + Math.round(r.cost / 4);
+      seen[key] = (seen[key] || 0);
+      r._offset = seen[key];
+      seen[key]++;
+    });
+
+    rows.forEach(function (r) {
+      // x = fit (0 left -> 100 right), y = cost (0 bottom -> 100 top)
+      var ox = 0, oy = 0;
+      if (r._offset > 0) {
+        var ang = r._offset * 2.4;
+        ox = Math.cos(ang) * (2.2 + r._offset * 0.6);
+        oy = Math.sin(ang) * (2.2 + r._offset * 0.6);
+      }
+      var xPct = Math.max(1, Math.min(99, r.fit + ox));
+      var yPct = Math.max(1, Math.min(99, r.cost + oy));
+      var dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.style.left = xPct + '%';
+      dot.style.bottom = yPct + '%';
+      dot.style.background = COLORS[r.bucket];
+      canvas.appendChild(dot);
+
+      var lab = document.createElement('div');
+      lab.className = 'dot-label';
+      lab.style.left = xPct + '%';
+      lab.style.bottom = yPct + '%';
+      lab.style.marginLeft = '10px';
+      lab.style.marginBottom = '0px';
+      lab.textContent = r.name.length > 32 ? r.name.slice(0, 30) + '\u2026' : r.name;
+      canvas.appendChild(lab);
+    });
+  }
+
+  function renderVerdicts(rows) {
+    var groups = { safe: [], scrutiny: [], guard: [] };
+    rows.forEach(function (r) { groups[r.bucket].push(r.name); });
+
+    var order = ['scrutiny', 'guard', 'safe']; // lead with the one that matters most
+    var html = '';
+    order.forEach(function (key) {
+      var b = BUCKET[key];
+      var list = groups[key];
+      html += '<div class="verdict ' + b.cls + '">' +
+        '<div class="verdict-head">' +
+          '<span class="verdict-dot"></span>' +
+          '<span class="verdict-name">' + b.name + '</span>' +
+          '<span class="verdict-count">' + list.length + ' task' + (list.length === 1 ? '' : 's') + '</span>' +
+        '</div>' +
+        '<p class="verdict-desc">' + b.desc + '</p>';
+      if (list.length) {
+        html += '<ul class="verdict-tasks">';
+        list.forEach(function (t) { html += '<li>' + escapeHtml(t) + '</li>'; });
+        html += '</ul>';
+      } else {
+        html += '<p class="verdict-empty">Nothing landed here.</p>';
+      }
+      html += '</div>';
+    });
+    document.getElementById('verdicts').innerHTML = html;
+  }
+
+  function renderTakeaway(rows) {
+    var g = { safe: 0, scrutiny: 0, guard: 0 };
+    rows.forEach(function (r) { g[r.bucket]++; });
+    var el = document.getElementById('takeaway');
+    var msg = '';
+
+    if (g.scrutiny === 0 && g.guard === 0) {
+      msg = '<p>Almost everything you listed sits in the delegate zone. Two possibilities: your role is unusually automatable, or you are rating fit high and cost low out of optimism. Run it again and be harder on the cost dial. The tasks where a quiet error would actually hurt are the ones worth finding.</p>';
+    } else if (g.scrutiny >= g.safe && g.scrutiny >= g.guard) {
+      msg = '<p>Your work clusters in the <em>scrutinize</em> zone, and that is the most valuable place to be. It means your day is full of work where AI helps but cannot be trusted blindly. That gap, between useful and trustworthy, is exactly where judgment pays. Protect the time to check this work properly. It is the part of your job that is hardest to replace.</p>';
+    } else if (g.guard >= g.safe) {
+      msg = '<p>A lot of your work sits in the <em>guard</em> zone, the tasks that lean on context and judgment the model does not have. That is a defensible position, but watch the edge: as the tools improve, some of these will drift left into scrutinize. The move is not to wall them off forever. It is to know exactly why each one still needs you, so you can tell when that stops being true.</p>';
+    } else {
+      msg = '<p>Most of what you listed is becoming free. That is not a threat by itself, it is a prompt. The value in your role is migrating toward the handful of tasks in the scrutinize and guard zones. Spend less of your defended attention on the delegate pile, and more on getting unmistakably good at the work AI makes worse, not better.</p>';
+    }
+
+    msg += '<p>Start tomorrow with one task from your <em>scrutinize</em> list. Use AI on it as you normally would, then spend ten minutes checking the output as if it were built to deceive you. What you find is the shape of the skill worth building.</p>';
+    el.innerHTML = '<h3>What your map is telling you</h3>' + msg;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  document.getElementById('runBtn').addEventListener('click', function () {
+    var rows = gather();
+    if (!rows.length) {
+      alert('Add at least one task with a name first.');
+      return;
+    }
+    plot(rows);
+    renderVerdicts(rows);
+    renderTakeaway(rows);
+    var res = document.getElementById('results');
+    res.classList.add('show');
+    res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', function () {
+    document.getElementById('results').classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+</script>
+</body>
+</html>
