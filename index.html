@@ -6,20 +6,21 @@
 <title>The AI Frontier Audit</title>
 <style>
   :root {
-    --ink: #14171c;
-    --ink-soft: #3a4049;
-    --paper: #eceae3;
-    --paper-raised: #f5f3ec;
-    --line: #c9c5b8;
-    --line-soft: #d8d4c8;
-    --safe: #4a7c6f;       /* delegate - calm teal-green */
-    --safe-fill: rgba(74, 124, 111, 0.12);
-    --scrutiny: #c08a3e;   /* scrutinize - amber */
-    --scrutiny-fill: rgba(192, 138, 62, 0.12);
-    --guard: #a8503c;      /* guard - terracotta-red */
-    --guard-fill: rgba(168, 80, 60, 0.12);
-    --grid: rgba(20, 23, 28, 0.08);
-    --shadow: rgba(20, 23, 28, 0.10);
+    --ink: #14253d;            /* deep professional blue, primary text */
+    --ink-soft: #5a6b80;       /* muted blue-grey, secondary text */
+    --paper: #eef2f7;          /* cool light ground */
+    --paper-raised: #f8fafc;   /* raised panel, near-white cool */
+    --line: #c7d2e0;           /* cool border */
+    --line-soft: #d8e0ea;      /* softer cool border */
+    --accent: #1d6fd4;         /* trust blue, interactive accent */
+    --safe: #0e9e6e;           /* delegate - confident green */
+    --safe-fill: rgba(14, 158, 110, 0.12);
+    --scrutiny: #e0992a;       /* scrutinize - warm motivating gold */
+    --scrutiny-fill: rgba(224, 153, 42, 0.15);
+    --guard: #b65141;          /* guard - dignified clay */
+    --guard-fill: rgba(182, 81, 65, 0.12);
+    --grid: rgba(20, 37, 61, 0.06);
+    --shadow: rgba(20, 37, 61, 0.10);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -239,18 +240,20 @@
   .run-btn {
     width: 100%;
     padding: 18px;
-    background: var(--ink);
+    background: var(--accent);
     border: none;
-    color: var(--paper);
+    color: #ffffff;
     font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
     font-size: 13px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 12px rgba(29, 111, 212, 0.25);
   }
-  .run-btn:hover { background: #000; }
-  .run-btn:disabled { background: var(--line); cursor: not-allowed; }
+  .run-btn:hover { background: #1860bd; box-shadow: 0 4px 18px rgba(29, 111, 212, 0.35); }
+  .run-btn:disabled { background: var(--line); color: var(--ink-soft); box-shadow: none; cursor: not-allowed; }
 
   /* ---- results ---- */
   .results { margin-top: 48px; display: none; }
@@ -328,7 +331,7 @@
     transform: translate(-50%, 50%);
     white-space: nowrap;
     pointer-events: none;
-    background: rgba(236, 234, 227, 0.82);
+    background: rgba(238, 242, 247, 0.85);
     padding: 1px 4px;
   }
 
@@ -373,8 +376,8 @@
   .takeaway {
     margin-top: 32px;
     padding: 24px 26px;
-    background: var(--ink);
-    color: var(--paper);
+    background: #14253d;
+    color: #eef2f7;
   }
   .takeaway h3 {
     font-family: 'SF Mono', 'JetBrains Mono', 'Courier New', monospace;
@@ -382,7 +385,8 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     margin-bottom: 12px;
-    opacity: 0.7;
+    color: var(--scrutiny);
+    opacity: 0.95;
   }
   .takeaway p { font-size: 16px; margin-bottom: 12px; }
   .takeaway p:last-child { margin-bottom: 0; }
@@ -596,19 +600,19 @@
     // shaded zones via SVG underlay
     var svg = '<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;">';
     // guard zone: fit < 45 (left strip)
-    svg += '<rect x="0" y="0" width="45" height="100" fill="rgba(168,80,60,0.10)"/>';
+    svg += '<rect x="0" y="0" width="45" height="100" fill="rgba(182,81,65,0.11)"/>';
     // scrutinize zone: fit >=45, cost >=60 (top right)
-    svg += '<rect x="45" y="0" width="55" height="40" fill="rgba(192,138,62,0.10)"/>';
+    svg += '<rect x="45" y="0" width="55" height="40" fill="rgba(224,153,42,0.15)"/>';
     // delegate zone: fit >=45, cost <60 (bottom right)
-    svg += '<rect x="45" y="40" width="55" height="60" fill="rgba(74,124,111,0.10)"/>';
+    svg += '<rect x="45" y="40" width="55" height="60" fill="rgba(14,158,110,0.12)"/>';
     // gridlines
     var i;
     for (i = 1; i < 4; i++) {
-      svg += '<line x1="' + (i*25) + '" y1="0" x2="' + (i*25) + '" y2="100" stroke="rgba(20,23,28,0.07)" stroke-width="0.4"/>';
-      svg += '<line x1="0" y1="' + (i*25) + '" x2="100" y2="' + (i*25) + '" stroke="rgba(20,23,28,0.07)" stroke-width="0.4"/>';
+      svg += '<line x1="' + (i*25) + '" y1="0" x2="' + (i*25) + '" y2="100" stroke="rgba(20,37,61,0.06)" stroke-width="0.4"/>';
+      svg += '<line x1="0" y1="' + (i*25) + '" x2="100" y2="' + (i*25) + '" stroke="rgba(20,37,61,0.06)" stroke-width="0.4"/>';
     }
     // frontier line: the boundary of the safe-to-delegate region
-    svg += '<path d="M 45 100 L 45 40 L 100 40" fill="none" stroke="rgba(20,23,28,0.32)" stroke-width="0.6" stroke-dasharray="2 1.6"/>';
+    svg += '<path d="M 45 100 L 45 40 L 100 40" fill="none" stroke="rgba(20,37,61,0.32)" stroke-width="0.6" stroke-dasharray="2 1.6"/>';
     svg += '</svg>';
     canvas.innerHTML = svg;
 
